@@ -1,0 +1,81 @@
+{
+    "name": "errorwatch/sdk-laravel",
+    "description": "Laravel SDK for ErrorWatch - Self-hosted error monitoring and APM",
+    "type": "library",
+    "license": "MIT",
+    "version": "0.1.0",
+    "keywords": [
+        "laravel",
+        "error-monitoring",
+        "errorwatch",
+        "apm",
+        "exception",
+        "tracing",
+        "sentry-alternative",
+        "performance",
+        "logging"
+    ],
+    "authors": [
+        {
+            "name": "ErrorWatch",
+            "email": "support@errorwatch.io",
+            "homepage": "https://errorwatch.io"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/MakFly/errorwatch-sdk-laravel/issues",
+        "source": "https://github.com/MakFly/errorwatch-sdk-laravel",
+        "docs": "https://docs.errorwatch.io"
+    },
+    "autoload": {
+        "psr-4": {
+            "ErrorWatch\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ErrorWatch\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/http": "^10.0|^11.0|^12.0",
+        "illuminate/database": "^10.0|^11.0|^12.0",
+        "illuminate/queue": "^10.0|^11.0|^12.0",
+        "illuminate/console": "^10.0|^11.0|^12.0",
+        "illuminate/auth": "^10.0|^11.0|^12.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0|^11.0",
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "phpstan/phpstan": "^1.11",
+        "mockery/mockery": "^1.6"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ErrorWatch\\Laravel\\ErrorWatchServiceProvider"
+            ],
+            "aliases": {
+                "ErrorWatch": "ErrorWatch\\Laravel\\Facades\\ErrorWatch"
+            }
+        },
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage",
+        "stan": "phpstan analyse",
+        "cs:check": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
