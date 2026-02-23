@@ -169,7 +169,7 @@ class HttpTransport
      */
     protected function getTransactionUrl(): string
     {
-        return $this->endpoint . '/api/v1/transaction';
+        return $this->endpoint . '/api/v1/performance/transaction';
     }
 
     /**

@@ -7,6 +7,7 @@ use ErrorWatch\Laravel\Commands\InstallCommand;
 use ErrorWatch\Laravel\Commands\TestCommand;
 use ErrorWatch\Laravel\Http\Middleware\ErrorWatchMiddleware;
 use ErrorWatch\Laravel\Logging\ErrorWatchHandler;
+use ErrorWatch\Laravel\Services\DeprecationHandler;
 use ErrorWatch\Laravel\Services\HttpClientListener;
 use ErrorWatch\Laravel\Services\QueryListener;
 use ErrorWatch\Laravel\Services\QueueListener;
@@ -75,6 +76,9 @@ class ErrorWatchServiceProvider extends ServiceProvider
 
         // Register HTTP client listener
         $this->registerHttpClientListener();
+
+        // Register deprecation handler
+        $this->registerDeprecationHandler();
 
         // Register Monolog handler
         $this->registerMonologHandler();
@@ -147,6 +151,24 @@ class ErrorWatchServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register PHP deprecation handler.
+     */
+    protected function registerDeprecationHandler(): void
+    {
+        if ($this->app['config']->get('errorwatch.deprecations.enabled', false)) {
+            // Instantiating the handler registers it via constructor
+            $this->app->singleton(DeprecationHandler::class, function ($app) {
+                return new DeprecationHandler(
+                    $app->make(MonitoringClient::class)
+                );
+            });
+
+            // Trigger instantiation to activate error handler
+            $this->app->make(DeprecationHandler::class);
+        }
+    }
+
+    /**
      * Register Monolog handler.
      */
     protected function registerMonologHandler(): void
@@ -208,6 +230,7 @@ class ErrorWatchServiceProvider extends ServiceProvider
         return [
             MonitoringClient::class,
             'errorwatch',
+            DeprecationHandler::class,
         ];
     }
 }

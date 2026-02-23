@@ -111,12 +111,12 @@
             // Use sendBeacon for reliability
             if (navigator.sendBeacon) {
                 navigator.sendBeacon(
-                    config.endpoint + '/api/v1/replay',
+                    config.endpoint + '/api/v1/replay/error',
                     JSON.stringify(payload)
                 );
             } else {
                 // Fallback to fetch
-                fetch(config.endpoint + '/api/v1/replay', {
+                fetch(config.endpoint + '/api/v1/replay/error', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
