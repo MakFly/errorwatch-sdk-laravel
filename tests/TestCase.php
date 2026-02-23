@@ -76,10 +76,13 @@ abstract class TestCase extends BaseTestCase
                 'slow_query_threshold_ms' => 500,
                 'excluded_routes' => [],
             ],
-            'monolog' => [
+            'logging' => [
                 'enabled' => true,
-                'level' => 'warning',
-                'excluded_channels' => [],
+                'level' => 'error',
+                'excluded_channels' => ['errorwatch'],
+            ],
+            'exceptions' => [
+                'enabled' => true,
             ],
             'logs' => [
                 'enabled' => true,

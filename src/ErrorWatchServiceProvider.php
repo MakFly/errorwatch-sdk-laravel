@@ -6,17 +6,18 @@ use ErrorWatch\Laravel\Client\MonitoringClient;
 use ErrorWatch\Laravel\Commands\InstallCommand;
 use ErrorWatch\Laravel\Commands\TestCommand;
 use ErrorWatch\Laravel\Http\Middleware\ErrorWatchMiddleware;
-use ErrorWatch\Laravel\Logging\ErrorWatchHandler;
+use ErrorWatch\Laravel\Logging\ErrorWatchLogger;
+use ErrorWatch\Laravel\Logging\ErrorWatchExceptionHandler;
 use ErrorWatch\Laravel\Services\DeprecationHandler;
 use ErrorWatch\Laravel\Services\HttpClientListener;
 use ErrorWatch\Laravel\Services\QueryListener;
 use ErrorWatch\Laravel\Services\QueueListener;
 use ErrorWatch\Laravel\Listeners\EventSubscriber;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Monolog\Logger;
 
 class ErrorWatchServiceProvider extends ServiceProvider
 {
@@ -80,8 +81,11 @@ class ErrorWatchServiceProvider extends ServiceProvider
         // Register deprecation handler
         $this->registerDeprecationHandler();
 
-        // Register Monolog handler
-        $this->registerMonologHandler();
+        // Register log listener (Laravel-native)
+        $this->registerLogListener();
+
+        // Register exception handler extension
+        $this->registerExceptionHandler();
 
         // Register Blade directive for session replay
         $this->registerBladeDirective();
@@ -156,47 +160,87 @@ class ErrorWatchServiceProvider extends ServiceProvider
     protected function registerDeprecationHandler(): void
     {
         if ($this->app['config']->get('errorwatch.deprecations.enabled', false)) {
-            // Instantiating the handler registers it via constructor
             $this->app->singleton(DeprecationHandler::class, function ($app) {
                 return new DeprecationHandler(
                     $app->make(MonitoringClient::class)
                 );
             });
 
-            // Trigger instantiation to activate error handler
             $this->app->make(DeprecationHandler::class);
         }
     }
 
     /**
-     * Register Monolog handler.
+     * Register log listener (Laravel-native, replaces Monolog handler).
      */
-    protected function registerMonologHandler(): void
+    protected function registerLogListener(): void
     {
-        if (!$this->app['config']->get('errorwatch.monolog.enabled', true)) {
+        if (!$this->app['config']->get('errorwatch.logging.enabled', true)) {
             return;
         }
 
-        // Get the Monolog instance from Laravel's logging system
-        if ($this->app->bound('log')) {
-            $logger = $this->app->make('log');
+        $this->app['events']->listen(MessageLogged::class, function (MessageLogged $event) {
+            $excludedChannels = $this->app['config']->get('errorwatch.logging.excluded_channels', []);
 
-            // For Laravel 10+, access the underlying Monolog instance
-            if (method_exists($logger, 'getLogger')) {
-                $monolog = $logger->getLogger();
-            } else {
-                $monolog = $logger;
+            $channel = property_exists($event, 'channel') ? $event->channel : 'application';
+
+            if (in_array($channel, $excludedChannels, true)) {
+                return;
             }
 
-            if ($monolog instanceof Logger) {
-                $monolog->pushHandler(
-                    new ErrorWatchHandler(
-                        $this->app->make(MonitoringClient::class),
-                        $this->app['config']->get('errorwatch.monolog.level', 'warning')
-                    )
-                );
+            $minLevel = $this->app['config']->get('errorwatch.logging.level', 'error');
+            if (!$this->shouldLog($event->level, $minLevel)) {
+                return;
             }
+
+            $client = $this->app->make(MonitoringClient::class);
+            $logger = new ErrorWatchLogger($client, $this->app['config']->get('errorwatch'));
+
+            $logger->handleLog($event->level, $event->message, [
+                'channel' => $channel,
+                'context' => $event->context,
+            ]);
+        });
+    }
+
+    /**
+     * Check if a log level should be captured.
+     */
+    protected function shouldLog(string $level, string $minLevel): bool
+    {
+        $levelMap = [
+            'debug' => 100,
+            'info' => 200,
+            'notice' => 250,
+            'warning' => 300,
+            'error' => 400,
+            'critical' => 500,
+            'alert' => 550,
+            'emergency' => 600,
+        ];
+
+        $levelValue = $levelMap[$level] ?? 400;
+        $minLevelValue = $levelMap[$minLevel] ?? 400;
+
+        return $levelValue >= $minLevelValue;
+    }
+
+    /**
+     * Register exception handler extension.
+     */
+    protected function registerExceptionHandler(): void
+    {
+        if (!$this->app['config']->get('errorwatch.exceptions.enabled', true)) {
+            return;
         }
+
+        $this->app->extend(\Illuminate\Contracts\Debug\ExceptionHandler::class, function ($handler, $app) {
+            return new ErrorWatchExceptionHandler(
+                $handler,
+                $app->make(MonitoringClient::class),
+                $app['config']->get('errorwatch')
+            );
+        });
     }
 
     /**

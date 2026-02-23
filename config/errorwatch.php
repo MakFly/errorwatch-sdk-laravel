@@ -86,11 +86,16 @@ return [
         'excluded_routes' => ['telescope/*', 'horizon/*', '_ignition/*'],
     ],
 
-    // Monolog integration configuration
-    'monolog' => [
-        'enabled' => true,
-        'level' => 'warning',
-        'excluded_channels' => [],
+    // Laravel logging integration (replaces Monolog handler)
+    'logging' => [
+        'enabled' => env('ERRORWATCH_LOGGING_ENABLED', true),
+        'level' => env('ERRORWATCH_LOG_LEVEL', 'error'),
+        'excluded_channels' => ['errorwatch'],
+    ],
+
+    // Exceptions handling configuration
+    'exceptions' => [
+        'enabled' => env('ERRORWATCH_EXCEPTIONS_ENABLED', true),
     ],
 
     // Live logs streaming configuration

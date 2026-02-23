@@ -248,10 +248,16 @@ return [
         'excluded_routes' => ['telescope/*', 'horizon/*'],
     ],
 
-    // Logging
-    'monolog' => [
+    // Logging (Laravel-native, replaces Monolog)
+    'logging' => [
         'enabled' => true,
-        'level' => 'warning',  // warning, error, critical, alert, emergency
+        'level' => 'error',  // debug, info, notice, warning, error, critical, alert, emergency
+        'excluded_channels' => ['errorwatch'],
+    ],
+
+    // Exceptions
+    'exceptions' => [
+        'enabled' => true,
     ],
 ];
 ```
