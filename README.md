@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://errorwatch.io">
-    <img src="https://errorwatch.io/logo.png" alt="ErrorWatch" width="80" height="80">
+    <img src="https://raw.githubusercontent.com/MakFly/sentry-like/main/packages/sdk-laravel/docs/logo.svg" alt="ErrorWatch" width="120" height="120">
   </a>
 </p>
 
