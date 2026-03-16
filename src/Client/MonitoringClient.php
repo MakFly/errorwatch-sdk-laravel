@@ -88,29 +88,28 @@ class MonitoringClient
 
         $eventId = $this->generateEventId();
 
+        // Format stack trace as a single string (API expects a string, not array)
+        $stackString = $exception->getTraceAsString();
+
+        // Build event payload matching the API's eventSchema:
+        // Required: message, file, line, stack
+        // Optional: env, level, url, status_code, breadcrumbs, release, user_id
         $event = [
-            'event_id' => $eventId,
-            'type' => 'exception',
-            'timestamp' => microtime(true),
-            'environment' => $this->config['environment'] ?? 'production',
+            'message' => get_class($exception) . ': ' . $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'stack' => $stackString,
+            'env' => $this->config['environment'] ?? 'production',
+            'level' => $this->mapExceptionLevel($exception),
+            'created_at' => (int)(microtime(true) * 1000),
+            'breadcrumbs' => $this->formatBreadcrumbsForApi(),
             'release' => $this->config['release'] ?? null,
-            'exception' => $this->formatException($exception),
-            'breadcrumbs' => $this->breadcrumbs->all(),
-            'user' => $this->userContext->getUser(),
-            'contexts' => [
-                'runtime' => $this->getRuntimeContext(),
-                'os' => $this->getOsContext(),
-            ],
-            'tags' => $context['tags'] ?? [],
-            'extra' => $context['extra'] ?? [],
+            'user_id' => $this->userContext->getUser()['id'] ?? null,
         ];
 
         // Add trace context if there's an active transaction
         if ($this->currentTransaction !== null) {
-            $event['contexts']['trace'] = [
-                'trace_id' => $this->currentTransaction->getTraceId(),
-                'span_id' => $this->currentTransaction->getSpanId(),
-            ];
+            $event['session_id'] = $this->currentTransaction->getTraceId();
         }
 
         // Apply before_send callback
@@ -127,6 +126,44 @@ class MonitoringClient
     }
 
     /**
+     * Map exception severity to API level enum.
+     */
+    protected function mapExceptionLevel(Throwable $exception): string
+    {
+        if ($exception instanceof \Error) {
+            return 'fatal';
+        }
+
+        return 'error';
+    }
+
+    /**
+     * Format breadcrumbs to match the API schema.
+     * API expects: { timestamp, category, type?, level?, message?, data? }
+     */
+    protected function formatBreadcrumbsForApi(): array
+    {
+        $breadcrumbs = $this->breadcrumbs->all();
+
+        return array_map(function (array $breadcrumb) {
+            $validCategories = ['ui', 'navigation', 'console', 'http', 'user'];
+            $category = $breadcrumb['category'] ?? 'user';
+            if (!in_array($category, $validCategories, true)) {
+                $category = 'user';
+            }
+
+            return [
+                'timestamp' => (int)($breadcrumb['timestamp'] ?? microtime(true) * 1000),
+                'category' => $category,
+                'type' => $breadcrumb['type'] ?? null,
+                'level' => $breadcrumb['level'] ?? 'info',
+                'message' => $breadcrumb['message'] ?? null,
+                'data' => $breadcrumb['data'] ?? null,
+            ];
+        }, $breadcrumbs);
+    }
+
+    /**
      * Capture a message.
      */
     public function captureMessage(string $message, string $level = 'info', array $context = []): ?string
@@ -137,21 +174,37 @@ class MonitoringClient
 
         $eventId = $this->generateEventId();
 
+        // Build a synthetic stack trace from the current call point
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+        $caller = $backtrace[1] ?? $backtrace[0] ?? [];
+        $file = $caller['file'] ?? 'unknown';
+        $line = $caller['line'] ?? 0;
+
+        // Build stack string from backtrace
+        $stackLines = [];
+        foreach ($backtrace as $i => $frame) {
+            $f = $frame['file'] ?? '[internal]';
+            $l = $frame['line'] ?? 0;
+            $fn = isset($frame['class'])
+                ? $frame['class'] . ($frame['type'] ?? '::') . ($frame['function'] ?? '')
+                : ($frame['function'] ?? '');
+            $stackLines[] = "#$i $f($l): $fn()";
+        }
+
+        $validLevels = ['fatal', 'error', 'warning', 'info', 'debug'];
+        $apiLevel = in_array($level, $validLevels, true) ? $level : 'error';
+
         $event = [
-            'event_id' => $eventId,
-            'type' => 'message',
-            'timestamp' => microtime(true),
-            'environment' => $this->config['environment'] ?? 'production',
-            'release' => $this->config['release'] ?? null,
             'message' => $message,
-            'level' => $level,
-            'breadcrumbs' => $this->breadcrumbs->all(),
-            'user' => $this->userContext->getUser(),
-            'contexts' => [
-                'runtime' => $this->getRuntimeContext(),
-            ],
-            'tags' => $context['tags'] ?? [],
-            'extra' => $context['extra'] ?? [],
+            'file' => $file,
+            'line' => $line,
+            'stack' => implode("\n", $stackLines),
+            'env' => $this->config['environment'] ?? 'production',
+            'level' => $apiLevel,
+            'created_at' => (int)(microtime(true) * 1000),
+            'breadcrumbs' => $this->formatBreadcrumbsForApi(),
+            'release' => $this->config['release'] ?? null,
+            'user_id' => $this->userContext->getUser()['id'] ?? null,
         ];
 
         $this->transport->send($event);
