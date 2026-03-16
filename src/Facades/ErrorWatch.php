@@ -40,13 +40,13 @@ class ErrorWatch extends Facade
      */
     public static function configure(array $options): void
     {
-        /** @var MonitoringClient $client */
-        $client = app(MonitoringClient::class);
-
         foreach ($options as $key => $value) {
             // Update config dynamically
             config(["errorwatch.{$key}" => $value]);
         }
+
+        // Reset the singleton so the next resolution picks up the new config
+        app()->forgetInstance(MonitoringClient::class);
     }
 
     /**
