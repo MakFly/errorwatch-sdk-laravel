@@ -178,7 +178,7 @@ class HttpTransport
     protected function getHeaders(): array
     {
         return [
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'X-API-Key' => $this->apiKey,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
             'User-Agent' => 'ErrorWatch-Laravel-SDK/1.0',

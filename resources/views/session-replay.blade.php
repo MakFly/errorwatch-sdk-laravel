@@ -120,7 +120,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + config.apiKey
+                        'X-API-Key': config.apiKey
                     },
                     body: JSON.stringify(payload),
                     keepalive: true

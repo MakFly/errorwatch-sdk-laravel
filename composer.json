@@ -3,7 +3,7 @@
     "description": "Laravel SDK for ErrorWatch - Self-hosted error monitoring and APM",
     "type": "library",
     "license": "MIT",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "keywords": [
         "laravel",
         "error-monitoring",
@@ -63,7 +63,7 @@
             }
         },
         "branch-alias": {
-            "dev-main": "0.1.x-dev"
+            "dev-main": "0.2.x-dev"
         }
     },
     "scripts": {
