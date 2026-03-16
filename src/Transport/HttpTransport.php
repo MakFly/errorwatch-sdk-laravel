@@ -75,7 +75,11 @@ class HttpTransport
     }
 
     /**
-     * Send multiple events in a batch.
+     * Send multiple events by posting each to the single-event endpoint.
+     *
+     * The monitoring server exposes /api/v1/event (single POST only).
+     * There is no batch endpoint, so we iterate and send individually.
+     * Returns true only if every event was sent successfully.
      */
     public function sendBatch(array $events): bool
     {
@@ -83,17 +87,15 @@ class HttpTransport
             return true;
         }
 
-        try {
-            $response = $this->client->post($this->getBatchUrl(), [
-                'headers' => $this->getHeaders(),
-                'json' => ['events' => $events],
-            ]);
+        $allSucceeded = true;
 
-            return $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
-        } catch (GuzzleException $e) {
-            error_log("[ErrorWatch] Failed to send batch: " . $e->getMessage());
-            return false;
+        foreach ($events as $event) {
+            if (!$this->send($event)) {
+                $allSucceeded = false;
+            }
         }
+
+        return $allSucceeded;
     }
 
     /**
@@ -146,14 +148,6 @@ class HttpTransport
     protected function getEventUrl(): string
     {
         return $this->endpoint . '/api/v1/event';
-    }
-
-    /**
-     * Get the batch endpoint URL.
-     */
-    protected function getBatchUrl(): string
-    {
-        return $this->endpoint . '/api/v1/events/batch';
     }
 
     /**
