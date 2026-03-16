@@ -107,24 +107,19 @@ class MonitoringClientTest extends TestCase
     /** @test */
     public function it_can_capture_message(): void
     {
-        // Create a client with mocked transport
+        // Mock transport on the existing app client to avoid handler leak
         $mockTransport = Mockery::mock(HttpTransport::class);
         $mockTransport->shouldReceive('send')
             ->once()
             ->with(Mockery::on(function ($payload) {
-                return $payload['type'] === 'message'
-                    && $payload['message'] === 'Test message';
+                return isset($payload['message'])
+                    && $payload['message'] === 'Test message'
+                    && $payload['level'] === 'info';
             }))
             ->andReturn(true);
 
-        $client = new MonitoringClient([
-            'enabled' => true,
-            'endpoint' => 'https://test.errorwatch.io',
-            'api_key' => 'test-key',
-            'environment' => 'testing',
-        ]);
+        $client = app(MonitoringClient::class);
 
-        // Replace transport with mock
         $reflection = new \ReflectionClass($client);
         $property = $reflection->getProperty('transport');
         $property->setAccessible(true);
@@ -138,24 +133,20 @@ class MonitoringClientTest extends TestCase
     /** @test */
     public function it_can_capture_exception(): void
     {
-        // Create a client with mocked transport
+        // Mock transport on the existing app client to avoid handler leak
         $mockTransport = Mockery::mock(HttpTransport::class);
         $mockTransport->shouldReceive('send')
             ->once()
             ->with(Mockery::on(function ($payload) {
-                return $payload['type'] === 'exception'
-                    && $payload['exception']['type'] === RuntimeException::class;
+                return isset($payload['message'])
+                    && str_contains($payload['message'], 'RuntimeException')
+                    && str_contains($payload['message'], 'Test exception')
+                    && $payload['level'] === 'error';
             }))
             ->andReturn(true);
 
-        $client = new MonitoringClient([
-            'enabled' => true,
-            'endpoint' => 'https://test.errorwatch.io',
-            'api_key' => 'test-key',
-            'environment' => 'testing',
-        ]);
+        $client = app(MonitoringClient::class);
 
-        // Replace transport with mock
         $reflection = new \ReflectionClass($client);
         $property = $reflection->getProperty('transport');
         $property->setAccessible(true);
