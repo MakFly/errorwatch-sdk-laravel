@@ -91,8 +91,8 @@ class ErrorWatchLogger
             'message' => $message,
             'timestamp' => microtime(true),
             'channel' => $context['channel'] ?? 'application',
-            'context' => $context['context'] ?? [],
-            'extra' => $context['extra'] ?? [],
+            'context' => (object) ($context['context'] ?? []),
+            'extra' => (object) ($context['extra'] ?? []),
         ];
 
         $this->client->getTransport()->sendLog($logEntry);
