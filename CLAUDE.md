@@ -36,17 +36,22 @@ GitHub Actions workflow: `.github/workflows/tests.yml`
 # "dev-main": "X.Y.x-dev"
 ```
 
-### 2. Update CHANGELOG.md
+### 2. Update CHANGELOG.md and README.md
 
-Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
+**CHANGELOG.md** — Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
 - Add new version section at the top
 - Document Added / Changed / Fixed / Security sections
 - Add compare link at the bottom
 
+**README.md** — Update:
+- Version notice banner (top of file) with new version number
+- Any changed features, requirements, or install instructions
+- Badges will auto-update from Packagist/GitHub
+
 ### 3. Commit, tag, push
 
 ```bash
-git add composer.json CHANGELOG.md
+git add composer.json CHANGELOG.md README.md
 git commit -m "chore: prepare release vX.Y.Z"
 git tag -a vX.Y.Z -m "vX.Y.Z - Short description"
 git push origin main --tags

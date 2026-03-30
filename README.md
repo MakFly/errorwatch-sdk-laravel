@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://errorwatch.io">
-    <img src="https://raw.githubusercontent.com/MakFly/sentry-like/main/packages/sdk-laravel/docs/logo.svg" alt="ErrorWatch" width="120" height="120">
+    <img src="https://raw.githubusercontent.com/MakFly/errorwatch-sdk-laravel/main/docs/logo.svg" alt="ErrorWatch" width="120" height="120">
   </a>
 </p>
 
@@ -21,10 +21,10 @@
     <img src="https://img.shields.io/github/actions/workflow/status/MakFly/errorwatch-sdk-laravel/tests.yml?branch=main&style=flat-square" alt="Build Status">
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/packagist/l/errorwatch/sdk-laravel.svg?style=flat-square" alt="License">
+    <img src="https://img.shields.io/packagist/l/errorwatch/sdk-laravel.svg?style=flat-square&label=License" alt="License - MIT">
   </a>
-  <a href="https://discord.gg/errorwatch">
-    <img src="https://img.shields.io/discord/123456789?style=flat-square&color=7289da" alt="Discord">
+  <a href="https://php.net">
+    <img src="https://img.shields.io/packagist/php-v/errorwatch/sdk-laravel.svg?style=flat-square" alt="PHP Version">
   </a>
 </p>
 
@@ -38,7 +38,7 @@
 
 ---
 
-> ⚠️ **Beta Notice**: This SDK is currently in beta (`v0.2.x`). The API is stable but may receive minor improvements before `v1.0.0`. We recommend testing in staging environments first.
+> **v0.5.0** — Production-ready. Resilient transport (circuit breaker, retry, deduplication), 102 tests passing across PHP 8.1-8.4 × Laravel 10-12. See [CHANGELOG](CHANGELOG.md) for details.
 
 ---
 
@@ -92,7 +92,7 @@
 Install via Composer:
 
 ```bash
-composer require errorwatch/sdk-laravel:@beta
+composer require errorwatch/sdk-laravel
 ```
 
 Publish the configuration file:
