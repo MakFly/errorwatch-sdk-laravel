@@ -5,10 +5,11 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 
 use ErrorWatch\Laravel\Transport\CircuitBreaker;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class CircuitBreakerTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_starts_in_closed_state(): void
     {
         $cb = new CircuitBreaker(failureThreshold: 5, cooldownSeconds: 60);
@@ -17,7 +18,7 @@ class CircuitBreakerTest extends TestCase
         $this->assertFalse($cb->isOpen());
     }
 
-    /** @test */
+    #[Test]
     public function it_opens_after_reaching_failure_threshold(): void
     {
         $cb = new CircuitBreaker(failureThreshold: 5, cooldownSeconds: 60);
@@ -35,7 +36,7 @@ class CircuitBreakerTest extends TestCase
         $this->assertTrue($cb->isOpen());
     }
 
-    /** @test */
+    #[Test]
     public function it_transitions_to_half_open_after_cooldown(): void
     {
         // Use a 1-second cooldown so the test doesn't have to wait long
@@ -56,7 +57,7 @@ class CircuitBreakerTest extends TestCase
         $this->assertFalse($cb->isOpen()); // HALF_OPEN, not OPEN
     }
 
-    /** @test */
+    #[Test]
     public function it_resets_to_closed_on_success(): void
     {
         $cb = new CircuitBreaker(failureThreshold: 3, cooldownSeconds: 1);
@@ -78,7 +79,7 @@ class CircuitBreakerTest extends TestCase
         $this->assertFalse($cb->isOpen());
     }
 
-    /** @test */
+    #[Test]
     public function it_reopens_on_failure_in_half_open_state(): void
     {
         $cb = new CircuitBreaker(failureThreshold: 2, cooldownSeconds: 1);
@@ -98,7 +99,7 @@ class CircuitBreakerTest extends TestCase
         $this->assertTrue($cb->isOpen());
     }
 
-    /** @test */
+    #[Test]
     public function it_resets_all_state_on_reset(): void
     {
         $cb = new CircuitBreaker(failureThreshold: 3, cooldownSeconds: 60);
@@ -116,7 +117,7 @@ class CircuitBreakerTest extends TestCase
         $this->assertFalse($cb->isOpen());
     }
 
-    /** @test */
+    #[Test]
     public function it_allows_requests_between_failures_below_threshold(): void
     {
         $cb = new CircuitBreaker(failureThreshold: 5, cooldownSeconds: 60);

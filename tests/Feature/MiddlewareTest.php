@@ -8,10 +8,11 @@ use Illuminate\Http\Response;
 use ErrorWatch\Laravel\Http\Middleware\ErrorWatchMiddleware;
 use ErrorWatch\Laravel\Facades\ErrorWatch;
 use RuntimeException;
+use PHPUnit\Framework\Attributes\Test;
 
 class MiddlewareTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_starts_transaction_on_request(): void
     {
         $middleware = $this->app->make(ErrorWatchMiddleware::class);
@@ -25,7 +26,7 @@ class MiddlewareTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    /** @test */
+    #[Test]
     public function it_captures_exceptions(): void
     {
         $middleware = $this->app->make(ErrorWatchMiddleware::class);
@@ -46,7 +47,7 @@ class MiddlewareTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_adds_breadcrumbs(): void
     {
         ErrorWatch::clearBreadcrumbs();
@@ -64,7 +65,7 @@ class MiddlewareTest extends TestCase
         $this->assertStringContainsString('POST', $breadcrumbs[0]['message'] ?? '');
     }
 
-    /** @test */
+    #[Test]
     public function it_sets_user_context_when_authenticated(): void
     {
         // Mock authenticated user
@@ -92,7 +93,7 @@ class MiddlewareTest extends TestCase
         $this->assertEquals('auth@example.com', $userContext['email']);
     }
 
-    /** @test */
+    #[Test]
     public function it_skips_excluded_routes(): void
     {
         // Build a dedicated MonitoringClient that already knows about the excluded route.

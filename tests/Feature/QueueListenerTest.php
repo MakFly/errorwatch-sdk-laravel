@@ -10,6 +10,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\DatabaseJob;
 use RuntimeException;
+use PHPUnit\Framework\Attributes\Test;
 
 class QueueListenerTest extends TestCase
 {
@@ -21,7 +22,7 @@ class QueueListenerTest extends TestCase
         $this->listener = $this->app->make(QueueListener::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_register_listener(): void
     {
         // register() attaches queue event listeners — it should complete without exceptions
@@ -31,7 +32,7 @@ class QueueListenerTest extends TestCase
         $this->assertInstanceOf(\ErrorWatch\Laravel\Services\QueueListener::class, $this->listener);
     }
 
-    /** @test */
+    #[Test]
     public function it_tracks_job_processing(): void
     {
         ErrorWatch::clearBreadcrumbs();
@@ -48,7 +49,7 @@ class QueueListenerTest extends TestCase
         $this->assertStringContainsString('Queue', $breadcrumbs[0]['message'] ?? '');
     }
 
-    /** @test */
+    #[Test]
     public function it_tracks_job_processed(): void
     {
         ErrorWatch::clearBreadcrumbs();
@@ -67,7 +68,7 @@ class QueueListenerTest extends TestCase
         $this->assertGreaterThanOrEqual(2, count($breadcrumbs));
     }
 
-    /** @test */
+    #[Test]
     public function it_captures_job_failure(): void
     {
         ErrorWatch::clearBreadcrumbs();

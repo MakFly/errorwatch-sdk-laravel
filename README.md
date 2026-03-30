@@ -38,7 +38,7 @@
 
 ---
 
-> **v0.5.0** — Production-ready. Resilient transport (circuit breaker, retry, deduplication), 102 tests passing across PHP 8.1-8.4 × Laravel 10-12. See [CHANGELOG](CHANGELOG.md) for details.
+> **v1.0.0** — Production-ready. Resilient transport (circuit breaker, retry, deduplication), 102 tests passing across PHP 8.1-8.4 × Laravel 10-12. See [CHANGELOG](CHANGELOG.md) for details.
 
 ---
 
@@ -338,15 +338,12 @@ cd errorwatch
 docker-compose up -d
 ```
 
-See the [self-hosting documentation](https://docs.errorwatch.io/self-hosting) for detailed setup instructions.
+See the [ErrorWatch repository](https://github.com/MakFly/errorwatch) for detailed setup instructions.
 
 ## Documentation
 
-- 📖 [Full Documentation](https://docs.errorwatch.io)
-- 🚀 [Getting Started Guide](https://docs.errorwatch.io/laravel/getting-started)
-- 🔧 [Configuration Reference](https://docs.errorwatch.io/laravel/configuration)
-- 📊 [APM Guide](https://docs.errorwatch.io/laravel/apm)
-- 🔌 [Self-Hosting](https://docs.errorwatch.io/self-hosting)
+- 📖 [ErrorWatch Repository](https://github.com/MakFly/errorwatch)
+- 🔌 [Self-Hosting](https://github.com/MakFly/errorwatch#readme)
 
 ## Comparison with Sentry
 
@@ -384,7 +381,6 @@ The MIT License (MIT). See [LICENSE](LICENSE) for more information.
 - 📧 Email: [support@errorwatch.io](mailto:support@errorwatch.io)
 - 💬 Discord: [Join our community](https://discord.gg/errorwatch)
 - 🐛 Issues: [GitHub Issues](https://github.com/MakFly/errorwatch-sdk-laravel/issues)
-- 📖 Docs: [docs.errorwatch.io](https://docs.errorwatch.io)
 
 ---
 

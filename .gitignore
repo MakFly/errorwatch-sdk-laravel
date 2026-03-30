@@ -25,3 +25,6 @@ Thumbs.db
 # Build
 /build/
 /dist/
+
+# instant-grep index
+.ig/

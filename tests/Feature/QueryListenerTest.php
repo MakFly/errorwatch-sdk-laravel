@@ -6,6 +6,7 @@ use ErrorWatch\Laravel\Services\QueryListener;
 use ErrorWatch\Laravel\Tests\TestCase;
 use Illuminate\Database\Events\QueryExecuted;
 use ErrorWatch\Laravel\Facades\ErrorWatch;
+use PHPUnit\Framework\Attributes\Test;
 
 class QueryListenerTest extends TestCase
 {
@@ -17,7 +18,7 @@ class QueryListenerTest extends TestCase
         $this->listener = $this->app->make(QueryListener::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_register_listener(): void
     {
         // register() attaches a DB listener — it should complete without exceptions
@@ -27,7 +28,7 @@ class QueryListenerTest extends TestCase
         $this->assertInstanceOf(\ErrorWatch\Laravel\Services\QueryListener::class, $this->listener);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_query(): void
     {
         ErrorWatch::clearBreadcrumbs();
@@ -47,7 +48,7 @@ class QueryListenerTest extends TestCase
         $this->assertStringContainsString('Query', $breadcrumbs[0]['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_detects_slow_queries(): void
     {
         config(['errorwatch.apm.slow_query_threshold_ms' => 100]);
@@ -68,7 +69,7 @@ class QueryListenerTest extends TestCase
         $this->assertNotEmpty(ErrorWatch::getBreadcrumbs());
     }
 
-    /** @test */
+    #[Test]
     public function it_sanitizes_long_queries(): void
     {
         ErrorWatch::clearBreadcrumbs();
@@ -93,7 +94,7 @@ class QueryListenerTest extends TestCase
         $this->assertLessThanOrEqual(1100, strlen($message));
     }
 
-    /** @test */
+    #[Test]
     public function it_resets_query_counts(): void
     {
         // Simulate enough queries on the same pattern to increment internal counts

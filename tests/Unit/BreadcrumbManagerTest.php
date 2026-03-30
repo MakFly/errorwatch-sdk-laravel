@@ -4,6 +4,7 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 
 use ErrorWatch\Laravel\Breadcrumbs\BreadcrumbManager;
 use ErrorWatch\Laravel\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class BreadcrumbManagerTest extends TestCase
 {
@@ -15,7 +16,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->manager = new BreadcrumbManager(100);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_breadcrumb(): void
     {
         $this->manager->add('Test message', 'info', 'default', ['key' => 'value']);
@@ -28,7 +29,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals(['key' => 'value'], $breadcrumbs[0]['data']);
     }
 
-    /** @test */
+    #[Test]
     public function it_limits_breadcrumb_count(): void
     {
         $manager = new BreadcrumbManager(5);
@@ -45,7 +46,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals('Breadcrumb 9', $breadcrumbs[4]['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_request_breadcrumb(): void
     {
         $this->manager->addRequest('GET', '/api/users', 200);
@@ -58,7 +59,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals(200, $breadcrumb['data']['status_code']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_query_breadcrumb(): void
     {
         $this->manager->addQuery('SELECT * FROM users', 15.5, 'mysql');
@@ -70,7 +71,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals(15.5, $breadcrumb['data']['duration_ms']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_http_client_breadcrumb(): void
     {
         $this->manager->addHttp('POST', 'https://api.example.com/users', 201, 150);
@@ -82,7 +83,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals(150, $breadcrumb['data']['duration_ms']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_console_breadcrumb(): void
     {
         $this->manager->addConsole('migrate', ['--force' => true], 0);
@@ -94,7 +95,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals(0, $breadcrumb['data']['exit_code']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_security_breadcrumb(): void
     {
         $this->manager->addSecurity('login', ['user_id' => 123]);
@@ -106,7 +107,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEquals('login', $breadcrumb['data']['event']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_clear_breadcrumbs(): void
     {
         $this->manager->add('Test 1');
@@ -117,7 +118,7 @@ class BreadcrumbManagerTest extends TestCase
         $this->assertEmpty($this->manager->all());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_change_max_count(): void
     {
         $this->manager->setMaxCount(3);

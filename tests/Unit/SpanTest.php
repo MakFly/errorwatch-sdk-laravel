@@ -5,10 +5,11 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 use ErrorWatch\Laravel\Tests\TestCase;
 use ErrorWatch\Laravel\Tracing\Span;
 use ErrorWatch\Laravel\Tracing\TraceContext;
+use PHPUnit\Framework\Attributes\Test;
 
 class SpanTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_create_span(): void
     {
         $context = TraceContext::generate();
@@ -18,7 +19,7 @@ class SpanTest extends TestCase
         $this->assertFalse($span->isFinished());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_tags(): void
     {
         $context = TraceContext::generate();
@@ -31,7 +32,7 @@ class SpanTest extends TestCase
         $this->assertEquals(123, $span->getTag('key2'));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_multiple_tags(): void
     {
         $context = TraceContext::generate();
@@ -42,7 +43,7 @@ class SpanTest extends TestCase
         $this->assertEquals(['key1' => 'value1', 'key2' => 'value2'], $span->getTags());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_data(): void
     {
         $context = TraceContext::generate();
@@ -53,7 +54,7 @@ class SpanTest extends TestCase
         $this->assertEquals(['foo' => 'bar'], $span->getData()['custom']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_status(): void
     {
         $context = TraceContext::generate();
@@ -64,7 +65,7 @@ class SpanTest extends TestCase
         $this->assertEquals('ok', $span->getStatus());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_ok_status(): void
     {
         $context = TraceContext::generate();
@@ -75,7 +76,7 @@ class SpanTest extends TestCase
         $this->assertEquals('ok', $span->getStatus());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_error_status(): void
     {
         $context = TraceContext::generate();
@@ -86,7 +87,7 @@ class SpanTest extends TestCase
         $this->assertEquals('error', $span->getStatus());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_finish_span(): void
     {
         $context = TraceContext::generate();
@@ -98,7 +99,7 @@ class SpanTest extends TestCase
         $this->assertNotNull($span->getEndTimestamp());
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_duration(): void
     {
         $context = TraceContext::generate();
@@ -110,7 +111,7 @@ class SpanTest extends TestCase
         $this->assertGreaterThanOrEqual(10, $span->getDurationMs());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_start_child_span(): void
     {
         $context = TraceContext::generate();
@@ -123,7 +124,7 @@ class SpanTest extends TestCase
         $this->assertCount(1, $parent->getSpans());
     }
 
-    /** @test */
+    #[Test]
     public function it_includes_child_spans_in_array(): void
     {
         $context = TraceContext::generate();
@@ -140,7 +141,7 @@ class SpanTest extends TestCase
         $this->assertCount(1, $array['spans']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_operation(): void
     {
         $context = TraceContext::generate();

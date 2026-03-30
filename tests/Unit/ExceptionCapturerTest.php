@@ -5,10 +5,11 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 use ErrorWatch\Laravel\Services\ExceptionCapturer;
 use ErrorWatch\Laravel\Tests\TestCase;
 use RuntimeException;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExceptionCapturerTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_format_exception(): void
     {
         $exception = new RuntimeException('Test exception', 500);
@@ -23,7 +24,7 @@ class ExceptionCapturerTest extends TestCase
         $this->assertArrayHasKey('stacktrace', $formatted);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_format_stack_trace(): void
     {
         $exception = new RuntimeException('Test');
@@ -33,7 +34,7 @@ class ExceptionCapturerTest extends TestCase
         $this->assertIsArray($trace);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_limit_stack_trace_frames(): void
     {
         // Create nested exception for longer trace
@@ -57,7 +58,7 @@ class ExceptionCapturerTest extends TestCase
         $this->assertLessThanOrEqual(2, count($trace));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_format_previous_exception(): void
     {
         $previous = new RuntimeException('Previous exception');
@@ -69,7 +70,7 @@ class ExceptionCapturerTest extends TestCase
         $this->assertEquals('Previous exception', $formatted['previous']['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_extract_context(): void
     {
         $exception = new RuntimeException('Test');

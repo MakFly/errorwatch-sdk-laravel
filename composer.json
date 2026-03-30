@@ -23,8 +23,7 @@
     ],
     "support": {
         "issues": "https://github.com/MakFly/errorwatch-sdk-laravel/issues",
-        "source": "https://github.com/MakFly/errorwatch-sdk-laravel",
-        "docs": "https://docs.errorwatch.io"
+        "source": "https://github.com/MakFly/errorwatch-sdk-laravel"
     },
     "autoload": {
         "psr-4": {
@@ -62,7 +61,7 @@
             }
         },
         "branch-alias": {
-            "dev-main": "0.5.x-dev"
+            "dev-main": "1.0.x-dev"
         }
     },
     "scripts": {

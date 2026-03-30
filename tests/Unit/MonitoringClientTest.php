@@ -8,10 +8,11 @@ use ErrorWatch\Laravel\Facades\ErrorWatch;
 use ErrorWatch\Laravel\Transport\HttpTransport;
 use Mockery;
 use RuntimeException;
+use PHPUnit\Framework\Attributes\Test;
 
 class MonitoringClientTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_check_if_enabled(): void
     {
         $this->assertTrue(ErrorWatch::isEnabled());
@@ -26,14 +27,14 @@ class MonitoringClientTest extends TestCase
         $this->assertFalse($disabledClient->isEnabled());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_config(): void
     {
         $this->assertEquals('testing', ErrorWatch::getConfig('environment'));
         $this->assertEquals('default', ErrorWatch::getConfig('nonexistent', 'default'));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_sample_events(): void
     {
         // Test with 100% sample rate
@@ -43,7 +44,7 @@ class MonitoringClientTest extends TestCase
         $this->assertFalse(ErrorWatch::shouldSample(0.0));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_and_get_user(): void
     {
         $user = [
@@ -58,7 +59,7 @@ class MonitoringClientTest extends TestCase
         $this->assertEquals($user['email'], ErrorWatch::getUser()['email']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_clear_user(): void
     {
         ErrorWatch::setUser(['id' => 123]);
@@ -67,7 +68,7 @@ class MonitoringClientTest extends TestCase
         $this->assertNull(ErrorWatch::getUser());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_add_breadcrumbs(): void
     {
         ErrorWatch::addBreadcrumb('Test breadcrumb', 'info', ['key' => 'value']);
@@ -78,7 +79,7 @@ class MonitoringClientTest extends TestCase
         $this->assertEquals('Test breadcrumb', $breadcrumbs[0]['message']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_clear_breadcrumbs(): void
     {
         ErrorWatch::addBreadcrumb('Test 1');
@@ -89,7 +90,7 @@ class MonitoringClientTest extends TestCase
         $this->assertEmpty(ErrorWatch::getBreadcrumbs());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_start_and_finish_transaction(): void
     {
         $transaction = ErrorWatch::startTransaction('test-transaction');
@@ -104,7 +105,7 @@ class MonitoringClientTest extends TestCase
         $this->assertNull(ErrorWatch::getCurrentTransaction());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_capture_message(): void
     {
         // Mock transport on the existing app client to avoid handler leak
@@ -130,7 +131,7 @@ class MonitoringClientTest extends TestCase
         $this->assertNotNull($result);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_capture_exception(): void
     {
         // Mock transport on the existing app client to avoid handler leak
@@ -158,7 +159,7 @@ class MonitoringClientTest extends TestCase
         $this->assertNotNull($result);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_null_when_disabled(): void
     {
         $client = new MonitoringClient([
@@ -174,7 +175,7 @@ class MonitoringClientTest extends TestCase
         $this->assertNull($result);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_breadcrumb_manager(): void
     {
         $manager = $this->client->getBreadcrumbManager();
@@ -183,7 +184,7 @@ class MonitoringClientTest extends TestCase
         $this->assertInstanceOf(\ErrorWatch\Laravel\Breadcrumbs\BreadcrumbManager::class, $manager);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_user_context(): void
     {
         $context = $this->client->getUserContext();
@@ -192,7 +193,7 @@ class MonitoringClientTest extends TestCase
         $this->assertInstanceOf(\ErrorWatch\Laravel\Context\UserContext::class, $context);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_transport(): void
     {
         $transport = $this->client->getTransport();

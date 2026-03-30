@@ -9,6 +9,7 @@ use ErrorWatch\Laravel\Transport\HttpTransport;
 use Mockery;
 use RuntimeException;
 use LogicException;
+use PHPUnit\Framework\Attributes\Test;
 
 class MonitoringClientDeduplicationTest extends TestCase
 {
@@ -30,7 +31,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $property->setValue($this->client, $this->mockTransport);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_an_event_id_on_first_capture(): void
     {
         $this->mockTransport->shouldReceive('send')->once()->andReturn(true);
@@ -44,7 +45,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $this->assertNotEmpty($eventId);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_null_on_second_capture_of_same_exception_instance(): void
     {
         // First call: transport::send should be called once
@@ -60,7 +61,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $this->assertNull($secondId);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_an_event_id_for_a_different_exception_instance(): void
     {
         $this->mockTransport->shouldReceive('send')->twice()->andReturn(true);
@@ -77,7 +78,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $this->assertNotEquals($idA, $idB);
     }
 
-    /** @test */
+    #[Test]
     public function it_allows_recapture_after_clear_captured_exceptions(): void
     {
         $this->mockTransport->shouldReceive('send')->twice()->andReturn(true);
@@ -95,7 +96,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $this->assertNotNull($secondId);
     }
 
-    /** @test */
+    #[Test]
     public function it_includes_tags_in_the_payload_sent_to_transport(): void
     {
         $this->mockTransport->shouldReceive('send')
@@ -119,7 +120,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $this->assertNotNull($eventId);
     }
 
-    /** @test */
+    #[Test]
     public function it_includes_extra_data_in_the_payload_sent_to_transport(): void
     {
         $this->mockTransport->shouldReceive('send')
@@ -143,7 +144,7 @@ class MonitoringClientDeduplicationTest extends TestCase
         $this->assertNotNull($eventId);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_capture_when_sdk_is_disabled(): void
     {
         $disabledClient = new MonitoringClient([

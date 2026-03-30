@@ -4,10 +4,11 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 
 use ErrorWatch\Laravel\Tests\TestCase;
 use ErrorWatch\Laravel\Transport\HttpTransport;
+use PHPUnit\Framework\Attributes\Test;
 
 class HttpTransportTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_create_transport(): void
     {
         $transport = new HttpTransport('https://test.errorwatch.io', 'test-key');
@@ -15,7 +16,7 @@ class HttpTransportTest extends TestCase
         $this->assertTrue($transport->isConfigured());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_false_when_not_configured(): void
     {
         $transport = new HttpTransport('', '');
@@ -23,7 +24,7 @@ class HttpTransportTest extends TestCase
         $this->assertFalse($transport->isConfigured());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_queue_events(): void
     {
         $transport = new HttpTransport('https://test.errorwatch.io', 'test-key');
@@ -42,7 +43,7 @@ class HttpTransportTest extends TestCase
         $this->assertEquals(['event' => 2], $pending[1]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_clear_queue_on_flush(): void
     {
         $transport = new HttpTransport('https://test.errorwatch.io', 'test-key');

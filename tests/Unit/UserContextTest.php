@@ -4,6 +4,7 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 
 use ErrorWatch\Laravel\Context\UserContext;
 use ErrorWatch\Laravel\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserContextTest extends TestCase
 {
@@ -15,7 +16,7 @@ class UserContextTest extends TestCase
         $this->context = new UserContext();
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_user_from_array(): void
     {
         $this->context->setUser([
@@ -32,7 +33,7 @@ class UserContextTest extends TestCase
         $this->assertEquals('testuser', $user['username']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_user_from_object(): void
     {
         $user = new \stdClass();
@@ -49,7 +50,7 @@ class UserContextTest extends TestCase
         $this->assertEquals('Object User', $context['username']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_clear_user(): void
     {
         $this->context->setUser(['id' => 123]);
@@ -58,7 +59,7 @@ class UserContextTest extends TestCase
         $this->assertNull($this->context->getUser());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_ip_address(): void
     {
         $this->context->setUser(['id' => 123]);
@@ -69,7 +70,7 @@ class UserContextTest extends TestCase
         $this->assertEquals('192.168.1.1', $user['ip_address']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_extra_data(): void
     {
         $this->context->setUser(['id' => 123]);
@@ -83,7 +84,7 @@ class UserContextTest extends TestCase
         ], $user['extra']);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_null_when_no_user_set(): void
     {
         $this->assertNull($this->context->getUser());

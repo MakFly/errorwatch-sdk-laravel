@@ -4,10 +4,11 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 
 use ErrorWatch\Laravel\Tests\TestCase;
 use ErrorWatch\Laravel\Tracing\TraceContext;
+use PHPUnit\Framework\Attributes\Test;
 
 class TraceContextTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_generate_trace_context(): void
     {
         $context = TraceContext::generate();
@@ -17,7 +18,7 @@ class TraceContextTest extends TestCase
         $this->assertNull($context->getParentSpanId());
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_valid_trace_id(): void
     {
         $traceId = TraceContext::generateTraceId();
@@ -26,7 +27,7 @@ class TraceContextTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]+$/', $traceId);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_valid_span_id(): void
     {
         $spanId = TraceContext::generateSpanId();
@@ -35,7 +36,7 @@ class TraceContextTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]+$/', $spanId);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_create_child_context(): void
     {
         $parent = TraceContext::generate();
@@ -46,7 +47,7 @@ class TraceContextTest extends TestCase
         $this->assertNotEquals($parent->getSpanId(), $child->getSpanId());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_convert_to_array(): void
     {
         $context = new TraceContext('abc123', 'def456', 'ghi789');
@@ -57,7 +58,7 @@ class TraceContextTest extends TestCase
         $this->assertEquals('ghi789', $array['parent_span_id']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_convert_to_trace_parent_header(): void
     {
         $context = new TraceContext('0123456789abcdef0123456789abcdef', '0123456789abcdef');
@@ -67,7 +68,7 @@ class TraceContextTest extends TestCase
         $this->assertEquals('00-0123456789abcdef0123456789abcdef-0123456789abcdef-01', $header);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_parse_trace_parent_header(): void
     {
         $header = '00-0123456789abcdef0123456789abcdef-0123456789abcdef-01';
@@ -79,7 +80,7 @@ class TraceContextTest extends TestCase
         $this->assertEquals('0123456789abcdef', $context->getParentSpanId());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_null_for_invalid_header(): void
     {
         $context = TraceContext::fromTraceParentHeader('invalid');
@@ -87,7 +88,7 @@ class TraceContextTest extends TestCase
         $this->assertNull($context);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_set_parent_span_id(): void
     {
         $context = TraceContext::generate();

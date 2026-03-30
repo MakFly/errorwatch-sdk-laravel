@@ -5,10 +5,11 @@ namespace ErrorWatch\Laravel\Tests\Unit;
 
 use ErrorWatch\Laravel\Transport\RetryHandler;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class RetryHandlerTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_should_retry_429_within_max_retries(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -17,7 +18,7 @@ class RetryHandlerTest extends TestCase
         $this->assertTrue($handler->shouldRetry(1, 429));
     }
 
-    /** @test */
+    #[Test]
     public function it_should_retry_503_within_max_retries(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -26,7 +27,7 @@ class RetryHandlerTest extends TestCase
         $this->assertTrue($handler->shouldRetry(1, 503));
     }
 
-    /** @test */
+    #[Test]
     public function it_should_retry_500_within_max_retries(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -35,7 +36,7 @@ class RetryHandlerTest extends TestCase
         $this->assertTrue($handler->shouldRetry(1, 500));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_false_when_attempt_reaches_max_retries(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -46,7 +47,7 @@ class RetryHandlerTest extends TestCase
         $this->assertFalse($handler->shouldRetry(2, 500));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_false_when_attempt_exceeds_max_retries(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -54,7 +55,7 @@ class RetryHandlerTest extends TestCase
         $this->assertFalse($handler->shouldRetry(3, 503));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_false_for_400_bad_request(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -62,7 +63,7 @@ class RetryHandlerTest extends TestCase
         $this->assertFalse($handler->shouldRetry(0, 400));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_false_for_404_not_found(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -70,7 +71,7 @@ class RetryHandlerTest extends TestCase
         $this->assertFalse($handler->shouldRetry(0, 404));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_false_for_401_unauthorized(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -78,7 +79,7 @@ class RetryHandlerTest extends TestCase
         $this->assertFalse($handler->shouldRetry(0, 401));
     }
 
-    /** @test */
+    #[Test]
     public function it_uses_retry_after_header_in_milliseconds(): void
     {
         $handler = new RetryHandler(maxRetries: 2);
@@ -92,7 +93,7 @@ class RetryHandlerTest extends TestCase
         $this->assertEquals(30000, $delay);
     }
 
-    /** @test */
+    #[Test]
     public function it_uses_exponential_backoff_without_retry_after(): void
     {
         $handler = new RetryHandler(maxRetries: 3);
@@ -113,7 +114,7 @@ class RetryHandlerTest extends TestCase
         $this->assertLessThanOrEqual(500, $delay2);
     }
 
-    /** @test */
+    #[Test]
     public function it_caps_exponential_backoff_at_5000_ms(): void
     {
         $handler = new RetryHandler(maxRetries: 10);
@@ -124,7 +125,7 @@ class RetryHandlerTest extends TestCase
         $this->assertLessThanOrEqual(5100, $delay);
     }
 
-    /** @test */
+    #[Test]
     public function it_considers_429_retryable(): void
     {
         $handler = new RetryHandler();
@@ -132,7 +133,7 @@ class RetryHandlerTest extends TestCase
         $this->assertTrue($handler->isRetryableStatus(429));
     }
 
-    /** @test */
+    #[Test]
     public function it_considers_503_retryable(): void
     {
         $handler = new RetryHandler();
@@ -140,7 +141,7 @@ class RetryHandlerTest extends TestCase
         $this->assertTrue($handler->isRetryableStatus(503));
     }
 
-    /** @test */
+    #[Test]
     public function it_considers_all_5xx_retryable(): void
     {
         $handler = new RetryHandler();
@@ -153,7 +154,7 @@ class RetryHandlerTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_consider_4xx_retryable_except_429(): void
     {
         $handler = new RetryHandler();
