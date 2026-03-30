@@ -14,9 +14,20 @@ Laravel SDK for [ErrorWatch](https://errorwatch.io) — self-hosted error monito
 ```bash
 composer install
 composer test              # Run PHPUnit
+composer audit             # Security vulnerability check
+composer check             # audit + test (use before committing)
 composer stan              # PHPStan analysis
 composer cs:check          # Code style check
 composer cs:fix            # Code style fix
+```
+
+## Git Hooks
+
+Pre-commit hook runs `composer audit` + `composer test` automatically.
+
+```bash
+# Setup (one-time, after cloning)
+git config core.hooksPath .githooks
 ```
 
 ## CI/CD

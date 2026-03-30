@@ -59,5 +59,8 @@ jobs:
           composer require "orchestra/testbench:${{ steps.testbench.outputs.version }}" --dev --no-update
           composer update --prefer-dist --no-interaction --no-progress
 
+      - name: Security audit
+        run: composer audit
+
       - name: Run tests
         run: composer test

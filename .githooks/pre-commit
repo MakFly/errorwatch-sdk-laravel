@@ -1,0 +1,19 @@
+#!/bin/sh
+# Pre-commit hook: security audit + tests
+# Install: git config core.hooksPath .githooks
+
+echo "Running composer audit..."
+composer audit
+if [ $? -ne 0 ]; then
+    echo "BLOCKED: Security vulnerabilities found. Fix them before committing."
+    exit 1
+fi
+
+echo "Running tests..."
+composer test
+if [ $? -ne 0 ]; then
+    echo "BLOCKED: Tests failing. Fix them before committing."
+    exit 1
+fi
+
+echo "All checks passed."
