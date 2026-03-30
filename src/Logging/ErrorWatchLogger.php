@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ErrorWatch\Laravel\Logging;
 
 use ErrorWatch\Laravel\Client\MonitoringClient;

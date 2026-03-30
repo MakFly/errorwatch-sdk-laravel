@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ErrorWatch\Laravel;
 
 use ErrorWatch\Laravel\Client\MonitoringClient;
@@ -89,6 +91,9 @@ class ErrorWatchServiceProvider extends ServiceProvider
 
         // Register Blade directive for session replay
         $this->registerBladeDirective();
+
+        // Reset state between requests for long-running servers (Octane, RoadRunner)
+        $this->registerOctaneReset();
     }
 
     /**
@@ -118,6 +123,7 @@ class ErrorWatchServiceProvider extends ServiceProvider
      */
     protected function registerEventSubscribers(): void
     {
+        // EventSubscriber::subscribe() handles per-feature config checks internally
         if ($this->app['config']->get('errorwatch.security.enabled', true) ||
             $this->app['config']->get('errorwatch.console.enabled', true)) {
             Event::subscribe(EventSubscriber::class);
@@ -250,19 +256,42 @@ class ErrorWatchServiceProvider extends ServiceProvider
     {
         Blade::directive('errorwatchReplay', function () {
             $replayEnabled = $this->app['config']->get('errorwatch.replay.enabled', false);
-            $sampleRate = $this->app['config']->get('errorwatch.replay.sample_rate', 0.1);
-            $endpoint = $this->app['config']->get('errorwatch.endpoint', '');
-            $apiKey = $this->app['config']->get('errorwatch.api_key', '');
 
             if (!$replayEnabled) {
                 return '';
             }
 
             return "<?php
-                if (mt_rand(1, 100) <= ({$sampleRate} * 100)) {
-                    echo '<script src=\"{$endpoint}/replay.js\" data-api-key=\"{$apiKey}\"></script>';
+            \$__ewSampleRate = (float) config('errorwatch.replay.sample_rate', 0.1);
+            \$__ewEndpoint = htmlspecialchars(config('errorwatch.endpoint', ''), ENT_QUOTES, 'UTF-8');
+            \$__ewApiKey = htmlspecialchars(config('errorwatch.api_key', ''), ENT_QUOTES, 'UTF-8');
+            if (mt_rand(1, 100) <= (\$__ewSampleRate * 100)) {
+                echo '<script src=\"' . \$__ewEndpoint . '/replay.js\" data-api-key=\"' . \$__ewApiKey . '\"></script>';
+            }
+        ?>";
+        });
+    }
+
+    /**
+     * Register Octane reset listener to clear per-request state.
+     */
+    protected function registerOctaneReset(): void
+    {
+        if (!class_exists(\Laravel\Octane\Events\RequestReceived::class)) {
+            return;
+        }
+
+        $this->app['events']->listen(\Laravel\Octane\Events\RequestReceived::class, function () {
+            if ($this->app->bound(MonitoringClient::class)) {
+                $client = $this->app->make(MonitoringClient::class);
+                $client->getBreadcrumbManager()->clear();
+                $client->clearUser();
+                $client->getTransport()->resetState();
+
+                if (method_exists($client, 'clearCapturedExceptions')) {
+                    $client->clearCapturedExceptions();
                 }
-            ?>";
+            }
         });
     }
 

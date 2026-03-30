@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ErrorWatch\Laravel\Client;
 
 use ErrorWatch\Laravel\Breadcrumbs\BreadcrumbManager;
@@ -8,10 +10,13 @@ use ErrorWatch\Laravel\Tracing\RequestTracer;
 use ErrorWatch\Laravel\Tracing\Span;
 use ErrorWatch\Laravel\Tracing\TraceContext;
 use ErrorWatch\Laravel\Transport\HttpTransport;
+use SplObjectStorage;
 use Throwable;
 
 class MonitoringClient
 {
+    public const VERSION = '0.2.0';
+
     protected array $config;
     protected HttpTransport $transport;
     protected BreadcrumbManager $breadcrumbs;
@@ -19,14 +24,21 @@ class MonitoringClient
     protected RequestTracer $tracer;
     protected ?Span $currentTransaction = null;
 
+    /** @var SplObjectStorage<Throwable, true> Tracks already-captured exceptions to prevent duplicates */
+    private SplObjectStorage $capturedExceptions;
+
     public function __construct(array $config)
     {
         $this->config = $config;
+        $this->capturedExceptions = new SplObjectStorage();
 
         $this->transport = new HttpTransport(
             $config['endpoint'] ?? '',
             $config['api_key'] ?? '',
-            5
+            $config['transport']['timeout'] ?? 5,
+            $config['transport']['circuit_breaker_threshold'] ?? 5,
+            $config['transport']['circuit_breaker_cooldown'] ?? 60,
+            $config['transport']['retry_attempts'] ?? 2,
         );
 
         $this->breadcrumbs = new BreadcrumbManager(
@@ -88,6 +100,7 @@ class MonitoringClient
 
     /**
      * Capture an exception.
+     * Returns null if disabled, already captured, or filtered by before_send.
      */
     public function captureException(Throwable $exception, array $context = []): ?string
     {
@@ -95,14 +108,16 @@ class MonitoringClient
             return null;
         }
 
+        // Deduplicate: skip if this exact exception instance was already captured
+        if ($this->capturedExceptions->contains($exception)) {
+            return null;
+        }
+        $this->capturedExceptions->attach($exception);
+
         $eventId = $this->generateEventId();
 
-        // Format stack trace as a single string (API expects a string, not array)
         $stackString = $exception->getTraceAsString();
 
-        // Build event payload matching the API's eventSchema:
-        // Required: message, file, line, stack
-        // Optional: env, level, url, status_code, breadcrumbs, release, user_id
         $event = [
             'message' => get_class($exception) . ': ' . $exception->getMessage(),
             'file' => $exception->getFile(),
@@ -115,6 +130,20 @@ class MonitoringClient
             'release' => $this->config['release'] ?? null,
             'user_id' => $this->userContext->getUser()['id'] ?? null,
         ];
+
+        // Merge context tags and extra data into the payload
+        if (!empty($context['tags'] ?? [])) {
+            $event['tags'] = $context['tags'];
+        }
+        if (!empty($context['extra'] ?? [])) {
+            $event['extra'] = $context['extra'];
+        }
+        if (!empty($context['url'] ?? null)) {
+            $event['url'] = $context['url'];
+        }
+        if (!empty($context['status_code'] ?? null)) {
+            $event['status_code'] = $context['status_code'];
+        }
 
         // Add trace context if there's an active transaction
         if ($this->currentTransaction !== null) {
@@ -234,7 +263,7 @@ class MonitoringClient
         $event = array_merge([
             'timestamp' => microtime(true),
             'environment' => $this->config['environment'] ?? 'production',
-            'breadcrumbs' => $this->breadcrumbs->all(),
+            'breadcrumbs' => $this->formatBreadcrumbsForApi(),
             'user' => $this->userContext->getUser(),
         ], $event);
 
@@ -362,6 +391,14 @@ class MonitoringClient
     public function getTransport(): HttpTransport
     {
         return $this->transport;
+    }
+
+    /**
+     * Clear the captured exceptions tracker (for Octane between-request reset).
+     */
+    public function clearCapturedExceptions(): void
+    {
+        $this->capturedExceptions = new SplObjectStorage();
     }
 
     /**

@@ -24,8 +24,11 @@ class QueueListenerTest extends TestCase
     /** @test */
     public function it_can_register_listener(): void
     {
+        // register() attaches queue event listeners — it should complete without exceptions
         $this->listener->register();
-        $this->assertTrue(true);
+
+        // Verify the listener instance is still valid after registration
+        $this->assertInstanceOf(\ErrorWatch\Laravel\Services\QueueListener::class, $this->listener);
     }
 
     /** @test */

@@ -85,26 +85,37 @@ class MiddlewareTest extends TestCase
             return new Response('OK', 200);
         });
 
-        // User should be set (checked through the middleware logic)
-        $this->assertEquals(200, 200); // Placeholder assertion
+        // The middleware should have set the user context from the request
+        $userContext = $this->client->getUser();
+        $this->assertNotNull($userContext);
+        $this->assertEquals(999, $userContext['id']);
+        $this->assertEquals('auth@example.com', $userContext['email']);
     }
 
     /** @test */
     public function it_skips_excluded_routes(): void
     {
-        config(['errorwatch.apm.excluded_routes' => ['telescope/*']]);
+        // Build a dedicated MonitoringClient that already knows about the excluded route.
+        // The existing $this->client is a singleton constructed before this test runs,
+        // so its internal config array would not reflect a config() override.
+        $clientWithExclusion = new \ErrorWatch\Laravel\Client\MonitoringClient(
+            array_merge(config('errorwatch'), [
+                'apm' => array_merge(config('errorwatch.apm'), [
+                    'excluded_routes' => ['telescope/*'],
+                ]),
+            ])
+        );
 
-        $middleware = $this->app->make(ErrorWatchMiddleware::class);
-        $request = Request::create('/telescope/requests', 'GET');
+        $middleware = new ErrorWatchMiddleware($clientWithExclusion);
+        $request    = Request::create('/telescope/requests', 'GET');
 
-        ErrorWatch::clearBreadcrumbs();
+        $clientWithExclusion->clearBreadcrumbs();
 
         $middleware->handle($request, function ($req) {
             return new Response('OK', 200);
         });
 
-        // No breadcrumbs should be added for excluded routes
-        // Note: The middleware may still add some breadcrumbs depending on implementation
-        $this->assertEquals(200, 200); // Placeholder assertion
+        // The excluded route should have been skipped — no breadcrumbs added by the middleware
+        $this->assertEmpty($clientWithExclusion->getBreadcrumbs());
     }
 }

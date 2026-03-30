@@ -31,8 +31,15 @@ class HttpTransportTest extends TestCase
         $transport->queue(['event' => 1]);
         $transport->queue(['event' => 2]);
 
-        // Verify events are queued (we can't easily check private property)
-        $this->assertTrue(true);
+        // Access pendingEvents via reflection to verify queuing
+        $reflection = new \ReflectionClass($transport);
+        $property = $reflection->getProperty('pendingEvents');
+        $property->setAccessible(true);
+        $pending = $property->getValue($transport);
+
+        $this->assertCount(2, $pending);
+        $this->assertEquals(['event' => 1], $pending[0]);
+        $this->assertEquals(['event' => 2], $pending[1]);
     }
 
     /** @test */
@@ -42,10 +49,15 @@ class HttpTransportTest extends TestCase
 
         $transport->queue(['event' => 1]);
 
-        // Flush will try to send but fail due to no network
-        $result = $transport->flush();
+        // Flush will try to send but fail due to no network; queue should be cleared regardless
+        $transport->flush();
 
-        // After flush, queue should be empty
-        $this->assertTrue(true);
+        // Verify pendingEvents is empty after flush
+        $reflection = new \ReflectionClass($transport);
+        $property = $reflection->getProperty('pendingEvents');
+        $property->setAccessible(true);
+        $pending = $property->getValue($transport);
+
+        $this->assertEmpty($pending);
     }
 }

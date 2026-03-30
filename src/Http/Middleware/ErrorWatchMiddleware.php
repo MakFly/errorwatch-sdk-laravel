@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ErrorWatch\Laravel\Http\Middleware;
 
 use Closure;
@@ -59,10 +61,10 @@ class ErrorWatchMiddleware
         try {
             $response = $next($request);
         } catch (Throwable $e) {
-            // Capture exception
-            $this->client->captureException($e);
+            // Do NOT capture the exception here — ErrorWatchExceptionHandler::report() handles it.
+            // This prevents double-capture when both middleware and handler are active.
 
-            // Finish transaction with error
+            // Finish transaction with error status
             if ($this->apmEnabled) {
                 $transaction = $this->client->getCurrentTransaction();
                 if ($transaction) {
@@ -107,6 +109,9 @@ class ErrorWatchMiddleware
                 $this->client->finishTransaction();
             }
         }
+
+        // Flush any pending async events before the process ends
+        $this->client->getTransport()->flushAsync();
     }
 
     /**

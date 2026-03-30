@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ErrorWatch\Laravel\Facades;
 
 use ErrorWatch\Laravel\Client\MonitoringClient;

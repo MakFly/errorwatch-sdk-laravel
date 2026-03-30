@@ -38,7 +38,7 @@
 
 ---
 
-> ⚠️ **Beta Notice**: This SDK is currently in beta (`v0.1.x`). The API is stable but may receive minor improvements before `v1.0.0`. We recommend testing in staging environments first.
+> ⚠️ **Beta Notice**: This SDK is currently in beta (`v0.2.x`). The API is stable but may receive minor improvements before `v1.0.0`. We recommend testing in staging environments first.
 
 ---
 
@@ -78,7 +78,6 @@
 - ✅ **Artisan Commands** - `errorwatch:install` and `errorwatch:test`
 - ✅ **Blade Directive** - `@errorwatchReplay()` for session recording
 - ✅ **Facade** - Clean `ErrorWatch::captureException()` syntax
-- ✅ **Full TypeScript Support** - For your frontend integration
 
 ## Requirements
 

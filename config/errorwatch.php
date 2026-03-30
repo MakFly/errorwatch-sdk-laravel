@@ -19,6 +19,14 @@ return [
     'environment' => env('APP_ENV', 'production'),
     'release' => env('APP_VERSION'),
 
+    // Transport/resilience configuration
+    'transport' => [
+        'timeout' => 5,
+        'retry_attempts' => env('ERRORWATCH_RETRY_ATTEMPTS', 2),
+        'circuit_breaker_threshold' => 5,
+        'circuit_breaker_cooldown' => 60,
+    ],
+
     // Session replay configuration
     'replay' => [
         'enabled' => env('ERRORWATCH_REPLAY_ENABLED', false),
@@ -65,6 +73,7 @@ return [
     'apm' => [
         'enabled' => true,
         'request_tracking' => true,
+        'sample_rate' => env('ERRORWATCH_APM_SAMPLE_RATE', 1.0),
 
         // Eloquent queries configuration (equivalent to Doctrine in Symfony)
         'eloquent' => [
@@ -89,7 +98,7 @@ return [
     // Laravel logging integration (replaces Monolog handler)
     'logging' => [
         'enabled' => env('ERRORWATCH_LOGGING_ENABLED', true),
-        'level' => env('ERRORWATCH_LOG_LEVEL', 'debug'),
+        'level' => env('ERRORWATCH_LOG_LEVEL', 'error'),
         'excluded_channels' => ['errorwatch'],
     ],
 

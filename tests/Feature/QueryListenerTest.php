@@ -20,9 +20,11 @@ class QueryListenerTest extends TestCase
     /** @test */
     public function it_can_register_listener(): void
     {
-        // Should not throw
+        // register() attaches a DB listener — it should complete without exceptions
         $this->listener->register();
-        $this->assertTrue(true);
+
+        // Verify the listener is still a valid QueryListener instance after registration
+        $this->assertInstanceOf(\ErrorWatch\Laravel\Services\QueryListener::class, $this->listener);
     }
 
     /** @test */
@@ -82,14 +84,45 @@ class QueryListenerTest extends TestCase
 
         $this->listener->handleQuery($query);
 
-        // Should not throw
-        $this->assertTrue(true);
+        // Breadcrumb should have been added with truncated SQL
+        $breadcrumbs = ErrorWatch::getBreadcrumbs();
+        $this->assertNotEmpty($breadcrumbs);
+
+        // The message stored in the breadcrumb should not exceed 1000 chars + truncation marker
+        $message = $breadcrumbs[0]['message'] ?? '';
+        $this->assertLessThanOrEqual(1100, strlen($message));
     }
 
     /** @test */
     public function it_resets_query_counts(): void
     {
+        // Simulate enough queries on the same pattern to increment internal counts
+        for ($i = 0; $i < 3; $i++) {
+            $query = new QueryExecuted(
+                'SELECT * FROM posts WHERE id = ?',
+                [$i],
+                5.0,
+                $this->app->make('db')->connection()
+            );
+            $this->listener->handleQuery($query);
+        }
+
+        // After reset, internal counts should be cleared (no exception thrown)
         $this->listener->reset();
-        $this->assertTrue(true);
+
+        // A fresh query after reset should not trigger any N+1 warning prematurely
+        ErrorWatch::clearBreadcrumbs();
+
+        $query = new QueryExecuted(
+            'SELECT * FROM posts WHERE id = ?',
+            [99],
+            5.0,
+            $this->app->make('db')->connection()
+        );
+        $this->listener->handleQuery($query);
+
+        // Only one breadcrumb from the single query, no N+1 capture message
+        $breadcrumbs = ErrorWatch::getBreadcrumbs();
+        $this->assertCount(1, $breadcrumbs);
     }
 }
