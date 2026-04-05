@@ -28,7 +28,7 @@ class Span
         $this->op = $op;
         $this->context = $context;
         $this->parent = $parent;
-        $this->startTimestamp = microtime(true);
+        $this->startTimestamp = microtime(true) * 1000;
     }
 
     /**
@@ -158,7 +158,7 @@ class Span
     public function finish(): void
     {
         if ($this->endTimestamp === null) {
-            $this->endTimestamp = microtime(true);
+            $this->endTimestamp = microtime(true) * 1000;
         }
     }
 
@@ -175,9 +175,9 @@ class Span
      */
     public function getDurationMs(): float
     {
-        $end = $this->endTimestamp ?? microtime(true);
+        $end = $this->endTimestamp ?? (microtime(true) * 1000);
 
-        return ($end - $this->startTimestamp) * 1000;
+        return $end - $this->startTimestamp;
     }
 
     /**
