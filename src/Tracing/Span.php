@@ -153,6 +153,14 @@ class Span
     }
 
     /**
+     * Override the start timestamp (e.g. to use LARAVEL_START for full request timing).
+     */
+    public function overrideStartTimestamp(float $timestampMs): void
+    {
+        $this->startTimestamp = $timestampMs;
+    }
+
+    /**
      * Finish the span.
      */
     public function finish(): void

@@ -40,7 +40,12 @@ class ErrorWatchMiddleware
         // Start transaction for APM
         if ($this->apmEnabled) {
             $route = $request->route()?->uri() ?? $request->path();
-            $this->client->startTransaction("{$request->method()} {$route}");
+            $transaction = $this->client->startTransaction("{$request->method()} {$route}");
+
+            // Use LARAVEL_START for accurate timing (includes bootstrap + all middleware)
+            if (defined('LARAVEL_START')) {
+                $transaction->overrideStartTimestamp(LARAVEL_START * 1000);
+            }
         }
 
         // Add request breadcrumb
