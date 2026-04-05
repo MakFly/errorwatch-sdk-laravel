@@ -15,7 +15,6 @@ class ErrorWatchMiddleware
     protected MonitoringClient $client;
     protected bool $apmEnabled;
     protected array $excludedRoutes;
-
     public function __construct(MonitoringClient $client)
     {
         $this->client = $client;
