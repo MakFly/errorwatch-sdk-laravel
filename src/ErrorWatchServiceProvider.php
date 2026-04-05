@@ -101,20 +101,10 @@ class ErrorWatchServiceProvider extends ServiceProvider
      */
     protected function registerMiddleware(): void
     {
-        /** @var \Illuminate\Foundation\Application $app */
-        $app = $this->app;
-
-        // Check Laravel version for different middleware registration
-        if (version_compare($app->version(), '11.0', '>=')) {
-            // Laravel 11+: Use middleware group
-            $app['router']->pushMiddlewareToGroup('web', ErrorWatchMiddleware::class);
-            $app['router']->pushMiddlewareToGroup('api', ErrorWatchMiddleware::class);
-        } else {
-            // Laravel 10: Register as global middleware
-            if ($app->bound(Kernel::class)) {
-                $kernel = $app->make(Kernel::class);
-                $kernel->pushMiddleware(ErrorWatchMiddleware::class);
-            }
+        // Register as global middleware (works for all Laravel versions and custom middleware groups)
+        if ($this->app->bound(Kernel::class)) {
+            $kernel = $this->app->make(Kernel::class);
+            $kernel->pushMiddleware(ErrorWatchMiddleware::class);
         }
     }
 
