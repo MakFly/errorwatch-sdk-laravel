@@ -126,7 +126,7 @@ class RequestTracer
      */
     public function addQuerySpan(string $sql, float $durationMs, string $connection = 'default'): Span
     {
-        $span = $this->startSpan("Query: {$connection}", 'db.query');
+        $span = $this->startSpan("Query: {$connection}", 'db.sql.query');
 
         $span->setData('sql', $sql);
         $span->setData('connection', $connection);

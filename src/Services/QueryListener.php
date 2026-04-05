@@ -64,7 +64,7 @@ class QueryListener
             $transaction = $this->client->getCurrentTransaction();
 
             if ($transaction) {
-                $span = $transaction->startChild("Query: {$connection}", 'db.query');
+                $span = $transaction->startChild("Query: {$connection}", 'db.sql.query');
                 $span->setData('sql', $this->sanitizeSql($sql));
                 $span->setData('connection', $connection);
                 $span->setData('bindings_count', count($bindings));
