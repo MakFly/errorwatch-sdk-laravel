@@ -163,6 +163,14 @@ class Span
     }
 
     /**
+     * Finish the span with a known duration (e.g. from Laravel's QueryExecuted->time).
+     */
+    public function finishWithDuration(float $durationMs): void
+    {
+        $this->endTimestamp = $this->startTimestamp + $durationMs;
+    }
+
+    /**
      * Check if the span is finished.
      */
     public function isFinished(): bool
@@ -248,6 +256,7 @@ class Span
         $result = [
             'id' => $this->context->getSpanId(),
             'name' => $this->name,
+            'description' => $this->name,
             'op' => $this->op,
             'traceId' => $this->context->getTraceId(),
             'spanId' => $this->context->getSpanId(),

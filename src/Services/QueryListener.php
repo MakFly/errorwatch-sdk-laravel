@@ -64,8 +64,9 @@ class QueryListener
             $transaction = $this->client->getCurrentTransaction();
 
             if ($transaction) {
-                $span = $transaction->startChild("Query: {$connection}", 'db.sql.query');
-                $span->setData('sql', $this->sanitizeSql($sql));
+                $sanitizedSql = $this->sanitizeSql($sql);
+                $span = $transaction->startChild($sanitizedSql, 'db.sql.query');
+                $span->setData('sql', $sanitizedSql);
                 $span->setData('connection', $connection);
                 $span->setData('bindings_count', count($bindings));
                 $span->setTag('db.system', 'sql');
@@ -73,10 +74,10 @@ class QueryListener
                 // Check for slow query
                 if ($timeMs > $this->slowQueryThresholdMs) {
                     $span->setTag('db.slow_query', true);
-                    $span->setData('duration_ms', $timeMs);
                 }
 
-                $span->finish();
+                // Use Laravel's measured query time for accurate duration
+                $span->finishWithDuration($timeMs);
             }
         }
 
