@@ -101,10 +101,12 @@ class ErrorWatchServiceProvider extends ServiceProvider
      */
     protected function registerMiddleware(): void
     {
-        // Register as global middleware (works for all Laravel versions and custom middleware groups)
         if ($this->app->bound(Kernel::class)) {
             $kernel = $this->app->make(Kernel::class);
-            $kernel->pushMiddleware(ErrorWatchMiddleware::class);
+
+            if (method_exists($kernel, 'pushMiddleware')) {
+                $kernel->pushMiddleware(ErrorWatchMiddleware::class);
+            }
         }
     }
 
@@ -176,6 +178,11 @@ class ErrorWatchServiceProvider extends ServiceProvider
         }
 
         $this->app['events']->listen(MessageLogged::class, function (MessageLogged $event) {
+            // Prevent self-capture: skip logs originating from the SDK itself
+            if (str_contains($event->message, '[ErrorWatch]')) {
+                return;
+            }
+
             $excludedChannels = $this->app['config']->get('errorwatch.logging.excluded_channels', []);
 
             $channel = property_exists($event, 'channel') ? $event->channel : 'application';

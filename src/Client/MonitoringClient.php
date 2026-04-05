@@ -112,6 +112,12 @@ class MonitoringClient
         if ($this->capturedExceptions->contains($exception)) {
             return null;
         }
+
+        // Prevent self-capture: skip exceptions originating from the SDK itself
+        if ($this->isInternalException($exception)) {
+            return null;
+        }
+
         $this->capturedExceptions->attach($exception);
 
         $eventId = $this->generateEventId();
@@ -460,5 +466,26 @@ class MonitoringClient
             'name' => PHP_OS_FAMILY,
             'version' => php_uname('r'),
         ];
+    }
+
+    /**
+     * Check if an exception originates from the SDK itself.
+     * Prevents self-capture loops where SDK errors get reported as app errors.
+     */
+    protected function isInternalException(Throwable $exception): bool
+    {
+        // Check the exception class namespace (SDK exception types only, not app exceptions)
+        $class = get_class($exception);
+        if (str_starts_with($class, 'ErrorWatch\\Laravel\\') && !str_starts_with($class, 'ErrorWatch\\Laravel\\Tests\\')) {
+            return true;
+        }
+
+        // Check if the exception was thrown from an SDK vendor file
+        $file = $exception->getFile();
+        if (str_contains($file, 'vendor/errorwatch/sdk-laravel/src/')) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -30,7 +30,22 @@ class ErrorWatchExceptionHandler implements ExceptionHandler
 
     public function shouldReport(Throwable $e): bool
     {
+        // Never report SDK-internal exceptions to avoid self-capture loops
+        if ($this->isInternalException($e)) {
+            return false;
+        }
+
         return $this->handler->shouldReport($e);
+    }
+
+    protected function isInternalException(Throwable $e): bool
+    {
+        $class = get_class($e);
+        if (str_starts_with($class, 'ErrorWatch\\Laravel\\') && !str_starts_with($class, 'ErrorWatch\\Laravel\\Tests\\')) {
+            return true;
+        }
+
+        return str_contains($e->getFile(), 'vendor/errorwatch/sdk-laravel/src/');
     }
 
     public function render($request, Throwable $e)
