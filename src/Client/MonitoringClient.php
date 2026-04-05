@@ -213,8 +213,15 @@ class MonitoringClient
         $eventId = $this->generateEventId();
 
         // Build a synthetic stack trace from the current call point
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
         $caller = $backtrace[1] ?? $backtrace[0] ?? [];
+        foreach ($backtrace as $frame) {
+            $framePath = $frame['file'] ?? '';
+            if ($framePath !== '' && !str_contains($framePath, '/vendor/')) {
+                $caller = $frame;
+                break;
+            }
+        }
         $file = $caller['file'] ?? 'unknown';
         $line = $caller['line'] ?? 0;
 
