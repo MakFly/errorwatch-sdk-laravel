@@ -368,7 +368,7 @@ class MonitoringClient
 
         // Send transaction data
         if ($this->shouldSample($this->config['apm']['sample_rate'] ?? 1.0)) {
-            $this->transport->sendTransaction($transactionData);
+            $this->transport->sendTransaction($transactionData, $this->config['environment'] ?? 'production');
         }
 
         $this->currentTransaction = null;

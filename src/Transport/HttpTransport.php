@@ -248,17 +248,22 @@ class HttpTransport
      * Send a transaction (APM) to the ErrorWatch API.
      * Circuit breaker check is applied; no retry logic.
      */
-    public function sendTransaction(array $transaction): bool
+    public function sendTransaction(array $transaction, ?string $env = null): bool
     {
         if (!$this->circuitBreaker->allowRequest()) {
             error_log('[ErrorWatch] Circuit breaker OPEN — skipping transaction send.');
             return false;
         }
 
+        $payload = [
+            'transaction' => $transaction,
+            'env'         => $env,
+        ];
+
         try {
             $response = $this->client->post($this->getTransactionUrl(), [
                 'headers' => $this->getHeaders(),
-                'json'    => $transaction,
+                'json'    => $payload,
             ]);
 
             $statusCode = $response->getStatusCode();

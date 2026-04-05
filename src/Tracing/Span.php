@@ -246,14 +246,15 @@ class Span
     public function toArray(): array
     {
         $result = [
+            'id' => $this->context->getSpanId(),
             'name' => $this->name,
             'op' => $this->op,
-            'trace_id' => $this->context->getTraceId(),
-            'span_id' => $this->context->getSpanId(),
-            'parent_span_id' => $this->context->getParentSpanId(),
-            'start_timestamp' => $this->startTimestamp,
-            'end_timestamp' => $this->endTimestamp,
-            'duration_ms' => $this->getDurationMs(),
+            'traceId' => $this->context->getTraceId(),
+            'spanId' => $this->context->getSpanId(),
+            'parentSpanId' => $this->context->getParentSpanId(),
+            'startTimestamp' => $this->startTimestamp,
+            'endTimestamp' => $this->endTimestamp,
+            'durationMs' => $this->getDurationMs(),
             'tags' => $this->tags,
             'data' => $this->data,
         ];
@@ -261,7 +262,7 @@ class Span
         if ($this->status !== null) {
             $result['status'] = $this->status;
             if ($this->statusDescription !== null) {
-                $result['status_description'] = $this->statusDescription;
+                $result['statusDescription'] = $this->statusDescription;
             }
         }
 
